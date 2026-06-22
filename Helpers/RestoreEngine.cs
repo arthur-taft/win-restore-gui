@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * Win-Restore
+ * RestoreEngine.cs
+ * Copyright (c) 2026 Arthur Taft. All Rights Reserved.
+*/
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;

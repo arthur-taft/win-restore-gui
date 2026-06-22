@@ -1,3 +1,8 @@
+/*
+ * Win-Restore
+ * MainForm.cs
+ * Copyright (c) 2026 Arthur Taft. All Rights Reserved.
+*/
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -116,6 +121,74 @@ namespace win_restore
         private void btnExit_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void btnAddPath_Click(object sender, EventArgs e)
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Select a folder to restore";
+                dialog.UseDescriptionForTitle = true;
+                dialog.ShowNewFolderButton = false;
+
+                if (dialog.ShowDialog() != DialogResult.OK) return;
+
+                string selectedPath = dialog.SelectedPath;
+                string folderName = Path.GetFileName(selectedPath);
+
+                if (_restoreItems.Any(i => i.Src.Equals(selectedPath, StringComparison.OrdinalIgnoreCase)))
+                {
+                    MessageBox.Show(
+                        "That folder is already in the list.",
+                        "Duplicate Path",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                    return;
+                }
+
+                string displayName = $"[Custom] {folderName}";
+
+                var newItem = new BackupItem
+                {
+                    Name = displayName,
+                    Src = selectedPath,
+                    Dest = Path.Combine(RestoreDestination, folderName), // restores to C:\Users\username\FolderName
+                    Enabled = true
+                };
+
+                _restoreItems.Add(newItem);
+                int index = clbLocations.Items.Add(displayName);
+                clbLocations.SetItemChecked(index, true);
+            }
+        }
+
+        private void btnRemovePath_Click(object sender, EventArgs e)
+        {
+            int selected = clbLocations.SelectedIndex;
+
+            if (selected == -1)
+            {
+                MessageBox.Show(
+                    "Please select a location from the list first.",
+                    "Nothing Selected",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!_restoreItems[selected].Name.StartsWith("[Custom]"))
+            {
+                MessageBox.Show(
+                    "Only custom paths can be removed.\n" +
+                    "Use the checkbox to disable built-in locations instead.",
+                    "Cannot Remove",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            _restoreItems.RemoveAt(selected);
+            clbLocations.Items.RemoveAt(selected);
         }
     }
 }

@@ -1,4 +1,9 @@
-﻿namespace win_restore.Models
+﻿/*
+ * Win-Restore
+ * BackupItem.cs
+ * Copyright (c) 2026 Arthur Taft. All Rights Reserved.
+*/
+namespace win_restore.Models
 {
     public class BackupItem
     {

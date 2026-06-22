@@ -1,4 +1,9 @@
-﻿namespace win_restore
+﻿/*
+ * Win-Restore
+ * MainForm.Designer.cs
+ * Copyright (c) 2026 Arthur Taft. All Rights Reserved.
+*/
+namespace win_restore
 {
     partial class MainForm
     {
@@ -37,6 +42,8 @@
             chkSizeCheck = new CheckBox();
             btnStart = new Button();
             btnExit = new Button();
+            btnAddPath = new Button();
+            btnRemovePath = new Button();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -72,10 +79,12 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(btnRemovePath);
+            groupBox1.Controls.Add(btnAddPath);
             groupBox1.Controls.Add(clbLocations);
             groupBox1.Location = new Point(12, 90);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(370, 310);
+            groupBox1.Size = new Size(370, 330);
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
             groupBox1.Text = "Locations to Restore";
@@ -117,7 +126,7 @@
             btnStart.BackColor = Color.SteelBlue;
             btnStart.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnStart.ForeColor = Color.White;
-            btnStart.Location = new Point(12, 415);
+            btnStart.Location = new Point(12, 435);
             btnStart.Name = "btnStart";
             btnStart.Size = new Size(460, 40);
             btnStart.TabIndex = 5;
@@ -127,7 +136,7 @@
             // 
             // btnExit
             // 
-            btnExit.Location = new Point(485, 415);
+            btnExit.Location = new Point(485, 435);
             btnExit.Name = "btnExit";
             btnExit.Size = new Size(82, 40);
             btnExit.TabIndex = 6;
@@ -135,11 +144,31 @@
             btnExit.UseVisualStyleBackColor = true;
             btnExit.Click += btnExit_Click;
             // 
+            // btnAddPath
+            // 
+            btnAddPath.Location = new Point(10, 291);
+            btnAddPath.Name = "btnAddPath";
+            btnAddPath.Size = new Size(151, 28);
+            btnAddPath.TabIndex = 1;
+            btnAddPath.Text = "+ Add Custom Path";
+            btnAddPath.UseVisualStyleBackColor = true;
+            btnAddPath.Click += btnAddPath_Click;
+            // 
+            // btnRemovePath
+            // 
+            btnRemovePath.Location = new Point(208, 291);
+            btnRemovePath.Name = "btnRemovePath";
+            btnRemovePath.Size = new Size(151, 28);
+            btnRemovePath.TabIndex = 2;
+            btnRemovePath.Text = "- Remove Selected";
+            btnRemovePath.UseVisualStyleBackColor = true;
+            btnRemovePath.Click += btnRemovePath_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(584, 471);
+            ClientSize = new Size(584, 491);
             Controls.Add(btnExit);
             Controls.Add(btnStart);
             Controls.Add(groupBox2);
@@ -170,5 +199,7 @@
         private CheckBox chkSizeCheck;
         private Button btnStart;
         private Button btnExit;
+        private Button btnRemovePath;
+        private Button btnAddPath;
     }
 }
