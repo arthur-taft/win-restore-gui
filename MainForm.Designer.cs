@@ -33,17 +33,19 @@ namespace win_restore
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             label1 = new Label();
             cboDrive = new ComboBox();
             lblDestination = new Label();
             groupBox1 = new GroupBox();
+            btnRemovePath = new Button();
+            btnAddPath = new Button();
             clbLocations = new CheckedListBox();
             groupBox2 = new GroupBox();
             chkSizeCheck = new CheckBox();
             btnStart = new Button();
             btnExit = new Button();
-            btnAddPath = new Button();
-            btnRemovePath = new Button();
+            btnDifferentUser = new Button();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -88,6 +90,26 @@ namespace win_restore
             groupBox1.TabIndex = 3;
             groupBox1.TabStop = false;
             groupBox1.Text = "Locations to Restore";
+            // 
+            // btnRemovePath
+            // 
+            btnRemovePath.Location = new Point(208, 291);
+            btnRemovePath.Name = "btnRemovePath";
+            btnRemovePath.Size = new Size(151, 28);
+            btnRemovePath.TabIndex = 2;
+            btnRemovePath.Text = "- Remove Selected";
+            btnRemovePath.UseVisualStyleBackColor = true;
+            btnRemovePath.Click += btnRemovePath_Click;
+            // 
+            // btnAddPath
+            // 
+            btnAddPath.Location = new Point(10, 291);
+            btnAddPath.Name = "btnAddPath";
+            btnAddPath.Size = new Size(151, 28);
+            btnAddPath.TabIndex = 1;
+            btnAddPath.Text = "+ Add Custom Path";
+            btnAddPath.UseVisualStyleBackColor = true;
+            btnAddPath.Click += btnAddPath_Click;
             // 
             // clbLocations
             // 
@@ -144,31 +166,23 @@ namespace win_restore
             btnExit.UseVisualStyleBackColor = true;
             btnExit.Click += btnExit_Click;
             // 
-            // btnAddPath
+            // btnDifferentUser
             // 
-            btnAddPath.Location = new Point(10, 291);
-            btnAddPath.Name = "btnAddPath";
-            btnAddPath.Size = new Size(151, 28);
-            btnAddPath.TabIndex = 1;
-            btnAddPath.Text = "+ Add Custom Path";
-            btnAddPath.UseVisualStyleBackColor = true;
-            btnAddPath.Click += btnAddPath_Click;
-            // 
-            // btnRemovePath
-            // 
-            btnRemovePath.Location = new Point(208, 291);
-            btnRemovePath.Name = "btnRemovePath";
-            btnRemovePath.Size = new Size(151, 28);
-            btnRemovePath.TabIndex = 2;
-            btnRemovePath.Text = "- Remove Selected";
-            btnRemovePath.UseVisualStyleBackColor = true;
-            btnRemovePath.Click += btnRemovePath_Click;
+            btnDifferentUser.FlatStyle = FlatStyle.System;
+            btnDifferentUser.Location = new Point(337, 62);
+            btnDifferentUser.Name = "btnDifferentUser";
+            btnDifferentUser.Size = new Size(230, 28);
+            btnDifferentUser.TabIndex = 7;
+            btnDifferentUser.Text = "Restore a different user";
+            btnDifferentUser.UseVisualStyleBackColor = true;
+            btnDifferentUser.Click += btnDifferentUser_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(584, 491);
+            Controls.Add(btnDifferentUser);
             Controls.Add(btnExit);
             Controls.Add(btnStart);
             Controls.Add(groupBox2);
@@ -177,6 +191,7 @@ namespace win_restore
             Controls.Add(cboDrive);
             Controls.Add(label1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
@@ -201,5 +216,6 @@ namespace win_restore
         private Button btnExit;
         private Button btnRemovePath;
         private Button btnAddPath;
+        private Button btnDifferentUser;
     }
 }

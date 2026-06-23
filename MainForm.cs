@@ -15,6 +15,11 @@ namespace win_restore
 {
     public partial class MainForm : Form
     {
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
+        private const uint BCM_SETSHIELD = 0x160C;
+
+        private string _targetUser = Environment.UserName;
         private List<BackupItem> _restoreItems = new List<BackupItem>();
         private Dictionary<string, DriveInfo> _driveMapping = new Dictionary<string, DriveInfo>();
 
@@ -23,21 +28,29 @@ namespace win_restore
             cboDrive.SelectedItem == null ? string.Empty :
             Path.Combine(
                 _driveMapping[cboDrive.SelectedItem.ToString()].RootDirectory.FullName.TrimEnd('\\'),
-                Environment.UserName);
+                _targetUser);
 
         // Always restores back to C:\Users\username
         private string RestoreDestination =>
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            Path.Combine(@"C:\Users", _targetUser);
 
-        public MainForm()
+        public MainForm(string[] args)
         {
             InitializeComponent();
+
+            btnDifferentUser.FlatStyle = FlatStyle.System;
+            SendMessage(btnDifferentUser.Handle, BCM_SETSHIELD, 0, 1);
 
             cboDrive.SelectedIndexChanged += (s, e) => LoadRestoreLocations();
 
             LoadDrives();
 
             lblDestination.Text = $"Restoring to: {RestoreDestination}";
+
+            if (args.Contains("--pickuser") && RestoreEngine.IsElevated())
+            {
+                ShowUserPicker();
+            }
         }
 
         private void LoadDrives()
@@ -59,7 +72,7 @@ namespace win_restore
             if (string.IsNullOrEmpty(BackupRoot))
                 return;
 
-            _restoreItems = RestoreEngine.BuildRestoreItems(BackupRoot);
+            _restoreItems = RestoreEngine.BuildRestoreItems(BackupRoot, RestoreDestination);
 
             if (_restoreItems.Count == 0)
             {
@@ -77,6 +90,29 @@ namespace win_restore
             {
                 int index = clbLocations.Items.Add(item.Name);
                 clbLocations.SetItemChecked(index, item.Enabled);
+            }
+        }
+
+        private void ShowUserPicker()
+        {
+            var users = RestoreEngine.GetUserProfiles();
+
+            if (users.Count == 0)
+            {
+                MessageBox.Show("No user profiles found.", "No Users",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var picker = new UserPickerForm(users, _targetUser))
+            {
+                if (picker.ShowDialog() == DialogResult.OK)
+                {
+                    _targetUser = picker.SelectedUser;
+                    Text = $"Backup Restore Utility — Restoring: {_targetUser}";
+                    lblDestination.Text = $"Restoring to: {RestoreDestination}";
+                    LoadRestoreLocations(); // rescan the drive for this user's backup
+                }
             }
         }
 
@@ -189,6 +225,20 @@ namespace win_restore
 
             _restoreItems.RemoveAt(selected);
             clbLocations.Items.RemoveAt(selected);
+        }
+
+        private void btnDifferentUser_Click(object sender, EventArgs e)
+        {
+            if (RestoreEngine.IsElevated())
+            {
+                ShowUserPicker();
+                return;
+            }
+
+            if (RestoreEngine.RelaunchElevated("--pickuser"))
+            {
+                Application.Exit();
+            }
         }
     }
 }

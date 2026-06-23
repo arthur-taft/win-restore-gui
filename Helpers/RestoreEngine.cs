@@ -8,14 +8,76 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
+using System.Security.Principal;
 using win_restore.Models;
 
 namespace win_restore.Helpers
 {
     public static class RestoreEngine
     {
+        // Returns true if the app is currently running with admin rights
+        public static bool IsElevated()
+        {
+            using (var identity = WindowsIdentity.GetCurrent())
+            {
+                var principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+        }
+
+        // Relaunches the current app elevated, passing along an argument.
+        // Returns true if the relaunch was started (so the caller can close itself).
+        public static bool RelaunchElevated(string argument)
+        {
+            var exePath = Process.GetCurrentProcess().MainModule.FileName;
+
+            var startInfo = new ProcessStartInfo(exePath)
+            {
+                UseShellExecute = true,   // required for the "runas" verb
+                Verb = "runas", // this is what triggers UAC
+                Arguments = argument
+            };
+
+            try
+            {
+                Process.Start(startInfo);
+                return true;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // User clicked "No" on the UAC prompt — Windows throws this
+                return false;
+            }
+        }
+
+        public static List<string> GetUserProfiles()
+        {
+            var users = new List<string>();
+            string usersRoot = @"C:\Users";
+
+            // These aren't real user accounts — skip them
+            var systemProfiles = new[] { "Public", "Default", "Default User", "All Users", "defaultuser0" };
+
+            if (!Directory.Exists(usersRoot)) return users;
+
+            foreach (var dir in Directory.GetDirectories(usersRoot))
+            {
+                string name = Path.GetFileName(dir);
+
+                if (systemProfiles.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    continue;
+
+                // A real profile will have a Desktop or NTUSER.DAT — quick sanity check
+                if (File.Exists(Path.Combine(dir, "NTUSER.DAT")) || Directory.Exists(Path.Combine(dir, "Desktop")))
+                    users.Add(name);
+            }
+
+            return users;
+        }
+
         public static readonly string TempLogPath =
             Path.Combine(Path.GetTempPath(), "robo_restore.log");
 
@@ -43,10 +105,9 @@ namespace win_restore.Helpers
 
         // Scans the backup drive for folders that exist under DriveLetter:\username\
         // and builds restore items pointing them back to C:\Users\username\
-        public static List<BackupItem> BuildRestoreItems(string backupRoot)
+        public static List<BackupItem> BuildRestoreItems(string backupRoot, string destRoot)
         {
             var items = new List<BackupItem>();
-            string destRoot = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
             if (!Directory.Exists(backupRoot))
                 return items;
