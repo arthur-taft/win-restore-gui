@@ -140,6 +140,23 @@ namespace win_restore
                 return;
             }
 
+            if (_restoreItems.Any(i => i.Enabled && i.IsBrowser))
+            {
+                var running = RestoreEngine.GetRunningBrowsers();
+                if (running.Count > 0)
+                {
+                    var answer = MessageBox.Show(
+                        $"These browsers are still running: {string.Join(", ", running)}\n\n" +
+                        "Close them for a complete restore. Continuing now will likely fail on locked files.\n\n" +
+                        "Continue anyway?",
+                        "Browsers Running",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning);
+
+                    if (answer == DialogResult.No) return;
+                }
+            }
+
             // Warn the user before overwriting — this is destructive
             var confirm = MessageBox.Show(
                 $"This will overwrite existing files in:\n{RestoreDestination}\n\n" +

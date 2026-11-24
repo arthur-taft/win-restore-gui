@@ -78,6 +78,28 @@ namespace win_restore.Helpers
             return users;
         }
 
+        public static List<string> GetRunningBrowsers()
+        {
+            var processNames = new Dictionary<string, string>
+            {
+                ["chrome"] = "Chrome",
+                ["msedge"] = "Edge",
+                ["firefox"] = "Firefox"
+            };
+
+            return processNames
+                .Where(p => Process.GetProcessesByName(p.Key).Length > 0)
+                .Select(p => p.Value)
+                .ToList();
+        }
+
+        public static readonly Dictionary<string, string> BrowserFolders = new()
+        {
+            ["Chrome"] = @"AppData\Local\Google\Chrome\User Data",
+            ["Edge"] = @"AppData\Local\Microsoft\Edge\User Data",
+            ["Firefox"] = @"AppData\Roaming\Mozilla\Firefox",
+        };
+
         public static readonly string TempLogPath =
             Path.Combine(Path.GetTempPath(), "robo_restore.log");
 
@@ -116,13 +138,18 @@ namespace win_restore.Helpers
             foreach (var dir in Directory.GetDirectories(backupRoot, "*", SearchOption.TopDirectoryOnly))
             {
                 string folderName = Path.GetFileName(dir);
+                bool isBrowser = BrowserFolders.TryGetValue(folderName, out string relativePath);
 
                 items.Add(new BackupItem
                 {
                     Name = folderName,
-                    Src = dir,                                    // FROM: backup drive
-                    Dest = Path.Combine(destRoot, folderName),     // TO: C:\Users\username\
-                    Enabled = true
+                    Src = dir,
+                    Dest = isBrowser
+                        ? Path.Combine(destRoot, relativePath)  // e.g. ...\AppData\Local\Google\Chrome\User Data
+                        : Path.Combine(destRoot, folderName),
+                    Enabled = true,
+                    IsBrowser = isBrowser,
+                    IsManySmallFiles = isBrowser
                 });
             }
 
@@ -175,6 +202,10 @@ namespace win_restore.Helpers
                     "/NP", "/NDL",
                     $"/UNILOG:\"{tempLog}\""
                 };
+                if (!item.IsManySmallFiles)
+                {
+                    args.Add("/J");
+                }
 
                 var process = Process.Start(new ProcessStartInfo(
                     "robocopy.exe", string.Join(" ", args))

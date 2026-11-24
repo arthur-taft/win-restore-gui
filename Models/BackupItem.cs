@@ -11,5 +11,7 @@ namespace win_restore.Models
         public string Src { get; set; }
         public string Dest { get; set; }
         public bool Enabled { get; set; }
+        public bool IsManySmallFiles { get; set; }
+        public bool IsBrowser { get; set; }
     }
 }
